@@ -161,6 +161,34 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0fff4;
+            border-radius: 12px;
+            border: 2px solid #48bb78;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -170,7 +198,7 @@
             <p>Fill in your details and get a professionally crafted cover letter in seconds</p>
         </div>
 
-        <form action="https://hurtable-overquickly-vonnie.ngrok-free.dev/workflow/ncdUzc0540EAemJR" method="POST" enctype="multipart/form-data" id="coverLetterForm">
+        <form action="https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit" method="POST" enctype="multipart/form-data" id="coverLetterForm">
             <div class="form-group">
                 <label for="name">Full Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your full name" required>
@@ -204,6 +232,12 @@
                 <div class="spinner"></div>
                 <p>Generating your professional cover letter...</p>
             </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3>✅ Cover Letter Ready!</h3>
+                <p>Your professional cover letter has been generated successfully.</p>
+                <button class="download-btn" id="downloadBtn">Download PDF</button>
+            </div>
         </form>
     </div>
 
@@ -213,6 +247,8 @@ const fileLabel = document.getElementById('fileLabel');
 const form = document.getElementById('coverLetterForm');
 const submitBtn = document.getElementById('submitBtn');
 const loading = document.getElementById('loading');
+const resultContainer = document.getElementById('resultContainer');
+const downloadBtn = document.getElementById('downloadBtn');
 
 // File label update
 fileInput.addEventListener('change', () => {
@@ -248,44 +284,85 @@ async function wait(ms) {
   return new Promise(res => setTimeout(res, ms));
 }
 
+let pdfUrl = '';
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   submitBtn.style.display = 'none';
   loading.style.display = 'block';
+  resultContainer.style.display = 'none';
   animateProgress(0);
 
-  const formData = new FormData(form);
-  const res = await fetch('https://hurtable-overquickly-vonnie.ngrok-free.dev/workflow/ncdUzc0540EAemJR', {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    const formData = new FormData(form);
+    
+    // Start real progress animation
+    for (let i = 0; i <= 30; i++) {
+      animateProgress(i);
+      await wait(50);
+    }
 
-  // Simulated progress while n8n runs
-  for (let i = 0; i <= 90; i++) {
-    animateProgress(i);
-    await wait(40);
+    const res = await fetch('https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit', {
+      method: 'POST',
+      body: formData
+    });
+
+    // Continue progress while waiting for response
+    for (let i = 31; i <= 80; i++) {
+      animateProgress(i);
+      await wait(30);
+    }
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    
+    if (!data.pdfBase64) {
+      throw new Error('No PDF returned from workflow');
+    }
+
+    // Final progress
+    for (let i = 81; i <= 100; i++) {
+      animateProgress(i);
+      await wait(20);
+    }
+
+    // Create PDF blob and URL
+    const pdfBlob = new Blob(
+      [Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0))], 
+      { type: 'application/pdf' }
+    );
+    pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // Show success result
+    loading.style.display = 'none';
+    resultContainer.style.display = 'block';
+
+  } catch (error) {
+    console.error('Error:', error);
+    loading.style.display = 'none';
+    alert('Error generating cover letter: ' + error.message);
+    submitBtn.style.display = 'block';
   }
-
-  const data = await res.json();
-  if (!data.pdfBase64) {
-    alert('No PDF returned — check workflow output.');
-    location.reload();
-    return;
-  }
-
-  animateProgress(100);
-  await wait(500);
-
-  const pdfBlob = new Blob([Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0))], { type: 'application/pdf' });
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-
-  const iframe = document.createElement('iframe');
-  iframe.src = pdfUrl;
-  iframe.style.width = '100%';
-  iframe.style.height = '700px';
-  iframe.style.border = 'none';
-  form.replaceWith(iframe);
 });
+
+// Download button handler
+downloadBtn.addEventListener('click', () => {
+  if (pdfUrl) {
+    const a = document.createElement('a');
+    a.href = pdfUrl;
+    a.download = 'cover_letter.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    alert('PDF is not ready yet. Please try again.');
+  }
+});
+
+// Set Webhook Response Mode to "When Last Node Finishes"
 </script>
 
 </body>
