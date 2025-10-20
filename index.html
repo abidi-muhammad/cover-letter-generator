@@ -102,8 +102,10 @@
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .submit-btn:active {
-            transform: translateY(0);
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .file-input-wrapper {
@@ -189,6 +191,17 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
         }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -198,7 +211,8 @@
             <p>Fill in your details and get a professionally crafted cover letter in seconds</p>
         </div>
 
-        <form action="https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit" method="POST" enctype="multipart/form-data" id="coverLetterForm">
+        <!-- REMOVED form action - using JavaScript only -->
+        <form id="coverLetterForm">
             <div class="form-group">
                 <label for="name">Full Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your full name" required>
@@ -230,7 +244,15 @@
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
+                <div class="progress-container">
+                    <svg width="120" height="120" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" stroke="#e2e8f0" stroke-width="6" fill="none"/>
+                        <circle cx="50" cy="50" r="45" stroke="#667eea" stroke-width="6" fill="none" stroke-dasharray="283" stroke-dashoffset="283" id="progressCircle"/>
+                        <text x="50" y="55" text-anchor="middle" font-size="18" fill="#667eea" id="progressText">0%</text>
+                    </svg>
+                </div>
                 <p>Generating your professional cover letter...</p>
+                <div class="progress-text" id="statusText">Starting workflow...</div>
             </div>
 
             <div class="result-container" id="resultContainer">
@@ -249,6 +271,9 @@ const submitBtn = document.getElementById('submitBtn');
 const loading = document.getElementById('loading');
 const resultContainer = document.getElementById('resultContainer');
 const downloadBtn = document.getElementById('downloadBtn');
+const progressCircle = document.getElementById('progressCircle');
+const progressText = document.getElementById('progressText');
+const statusText = document.getElementById('statusText');
 
 // File label update
 fileInput.addEventListener('change', () => {
@@ -261,23 +286,11 @@ fileInput.addEventListener('change', () => {
   }
 });
 
-// Add a progress bar SVG below spinner
-const progress = document.createElement('div');
-progress.innerHTML = `
-  <svg width="120" height="120" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="45" stroke="#667eea" stroke-width="6" fill="none" stroke-dasharray="283" stroke-dashoffset="283"/>
-    <text x="50" y="55" text-anchor="middle" font-size="18" fill="#333">0%</text>
-  </svg>
-`;
-loading.appendChild(progress);
-
-const circle = progress.querySelector('circle');
-const text = progress.querySelector('text');
-
-function animateProgress(percent) {
+function updateProgress(percent, status = '') {
   const offset = 283 - (283 * percent) / 100;
-  circle.style.strokeDashoffset = offset;
-  text.textContent = `${percent}%`;
+  progressCircle.style.strokeDashoffset = offset;
+  progressText.textContent = `${percent}%`;
+  if (status) statusText.textContent = status;
 }
 
 async function wait(ms) {
@@ -288,33 +301,41 @@ let pdfUrl = '';
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  submitBtn.style.display = 'none';
+  submitBtn.disabled = true;
   loading.style.display = 'block';
   resultContainer.style.display = 'none';
-  animateProgress(0);
+  updateProgress(0, 'Starting workflow...');
 
   try {
     const formData = new FormData(form);
     
-    // Start real progress animation
-    for (let i = 0; i <= 30; i++) {
-      animateProgress(i);
-      await wait(50);
-    }
+    // Convert FormData to JSON for n8n
+    const jsonData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      job_description: formData.get('job_description')
+    };
+
+    updateProgress(10, 'Sending data to workflow...');
 
     const res = await fetch('https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData)
     });
 
-    // Continue progress while waiting for response
-    for (let i = 31; i <= 80; i++) {
-      animateProgress(i);
-      await wait(30);
-    }
+    updateProgress(30, 'Workflow started...');
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    // Simulate progress while workflow runs
+    for (let i = 40; i <= 90; i += 10) {
+      updateProgress(i, 'Generating cover letter...');
+      await wait(800);
     }
 
     const data = await res.json();
@@ -323,11 +344,9 @@ form.addEventListener('submit', async (e) => {
       throw new Error('No PDF returned from workflow');
     }
 
-    // Final progress
-    for (let i = 81; i <= 100; i++) {
-      animateProgress(i);
-      await wait(20);
-    }
+    updateProgress(100, 'Complete!');
+
+    await wait(500);
 
     // Create PDF blob and URL
     const pdfBlob = new Blob(
@@ -344,7 +363,7 @@ form.addEventListener('submit', async (e) => {
     console.error('Error:', error);
     loading.style.display = 'none';
     alert('Error generating cover letter: ' + error.message);
-    submitBtn.style.display = 'block';
+    submitBtn.disabled = false;
   }
 });
 
@@ -361,8 +380,6 @@ downloadBtn.addEventListener('click', () => {
     alert('PDF is not ready yet. Please try again.');
   }
 });
-
-// Set Webhook Response Mode to "When Last Node Finishes"
 </script>
 
 </body>
