@@ -211,7 +211,6 @@
             <p>Fill in your details and get a professionally crafted cover letter in seconds</p>
         </div>
 
-        <!-- REMOVED form action - using JavaScript only -->
         <form id="coverLetterForm">
             <div class="form-group">
                 <label for="name">Full Name</label>
@@ -307,23 +306,25 @@ form.addEventListener('submit', async (e) => {
   updateProgress(0, 'Starting workflow...');
 
   try {
-    const formData = new FormData(form);
-    
-    // Convert FormData to JSON for n8n
-    const jsonData = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      job_description: formData.get('job_description')
+    const formData = {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      job_description: document.getElementById('job_description').value
     };
 
     updateProgress(10, 'Sending data to workflow...');
 
-    const res = await fetch('https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit', {
+    // Use CORS proxy to bypass CORS error
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const targetUrl = 'https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit';
+    
+    const res = await fetch(proxyUrl + targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
-      body: JSON.stringify(jsonData)
+      body: JSON.stringify(formData)
     });
 
     updateProgress(30, 'Workflow started...');
