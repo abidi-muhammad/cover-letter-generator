@@ -5,210 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Cover Letter Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+            padding: 20px; 
         }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .form-container { 
+            background: white; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+            padding: 40px; width: 100%; max-width: 500px; 
         }
-
-        .form-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            padding: 40px;
-            width: 100%;
-            max-width: 500px;
+        .form-header { text-align: center; margin-bottom: 32px; }
+        .form-header h1 { color: #1a365d; font-size: 32px; margin-bottom: 8px; }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d3748; }
+        input, textarea { 
+            width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            font-size: 16px; background: #f7fafc; 
         }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .form-header h1 {
-            color: #1a365d;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .form-header p {
-            color: #718096;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 14px;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f7fafc;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-            font-family: inherit;
-        }
-
         .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
+            width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; 
+            font-weight: 600; cursor: pointer; margin-top: 8px; 
         }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: block;
-            padding: 14px 16px;
-            background: #f7fafc;
-            border: 2px dashed #cbd5e0;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #718096;
-        }
-
-        .file-input-label:hover {
-            border-color: #667eea;
-            background: #edf2f7;
-        }
-
-        .file-input-label.has-file {
-            border-color: #48bb78;
-            background: #f0fff4;
-            color: #2d3748;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .result-container {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f0fff4;
-            border-radius: 12px;
-            border: 2px solid #48bb78;
-        }
-
-        .download-btn {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
-        }
-
-        .progress-container {
-            margin: 20px 0;
-        }
-
-        .progress-text {
-            text-align: center;
-            color: #667eea;
-            font-weight: 600;
-            margin-top: 10px;
-        }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .loading { display: none; text-align: center; padding: 20px; }
+        .result-container { display: none; text-align: center; margin-top: 20px; padding: 20px; background: #f0fff4; border-radius: 12px; }
     </style>
 </head>
 <body>
     <div class="form-container">
         <div class="form-header">
             <h1>📝 AI Cover Letter Generator</h1>
-            <p>Fill in your details and get a professionally crafted cover letter in seconds</p>
+            <p>Fill in your details and get a professionally crafted cover letter</p>
         </div>
 
         <form id="coverLetterForm">
@@ -216,94 +46,41 @@
                 <label for="name">Full Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your full name" required>
             </div>
-
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
             </div>
-
             <div class="form-group">
-                <label for="job_description">Job Description & Requirements</label>
-                <textarea id="job_description" name="job_description" placeholder="Paste the job description, key requirements, and company details..." required></textarea>
+                <label for="job_description">Job Description</label>
+                <textarea id="job_description" name="job_description" placeholder="Paste job description..." required></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Upload Your CV (Optional)</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="cv" name="cv" class="file-input" accept=".pdf,.docx,.doc">
-                    <label for="cv" class="file-input-label" id="fileLabel">
-                        📎 Click to upload CV (PDF or DOCX)
-                    </label>
-                </div>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">
-                Generate Cover Letter
-            </button>
+            <button type="submit" class="submit-btn" id="submitBtn">Generate Cover Letter</button>
 
             <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <div class="progress-container">
-                    <svg width="120" height="120" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" stroke="#e2e8f0" stroke-width="6" fill="none"/>
-                        <circle cx="50" cy="50" r="45" stroke="#667eea" stroke-width="6" fill="none" stroke-dasharray="283" stroke-dashoffset="283" id="progressCircle"/>
-                        <text x="50" y="55" text-anchor="middle" font-size="18" fill="#667eea" id="progressText">0%</text>
-                    </svg>
-                </div>
-                <p>Generating your professional cover letter...</p>
-                <div class="progress-text" id="statusText">Starting workflow...</div>
+                <p>🚀 Generating your cover letter... This may take 20-30 seconds</p>
+                <p><small>Workflow is running on your local n8n instance</small></p>
             </div>
 
             <div class="result-container" id="resultContainer">
                 <h3>✅ Cover Letter Ready!</h3>
-                <p>Your professional cover letter has been generated successfully.</p>
-                <button class="download-btn" id="downloadBtn">Download PDF</button>
+                <p>Check your n8n workflow for the generated PDF</p>
+                <p><small>Due to CORS restrictions, the PDF will appear in your n8n interface</small></p>
             </div>
         </form>
     </div>
 
 <script>
-const fileInput = document.getElementById('cv');
-const fileLabel = document.getElementById('fileLabel');
 const form = document.getElementById('coverLetterForm');
 const submitBtn = document.getElementById('submitBtn');
 const loading = document.getElementById('loading');
 const resultContainer = document.getElementById('resultContainer');
-const downloadBtn = document.getElementById('downloadBtn');
-const progressCircle = document.getElementById('progressCircle');
-const progressText = document.getElementById('progressText');
-const statusText = document.getElementById('statusText');
-
-// File label update
-fileInput.addEventListener('change', () => {
-  if (fileInput.files.length > 0) {
-    fileLabel.textContent = `✅ ${fileInput.files[0].name}`;
-    fileLabel.classList.add('has-file');
-  } else {
-    fileLabel.textContent = '📎 Click to upload CV (PDF or DOCX)';
-    fileLabel.classList.remove('has-file');
-  }
-});
-
-function updateProgress(percent, status = '') {
-  const offset = 283 - (283 * percent) / 100;
-  progressCircle.style.strokeDashoffset = offset;
-  progressText.textContent = `${percent}%`;
-  if (status) statusText.textContent = status;
-}
-
-async function wait(ms) {
-  return new Promise(res => setTimeout(res, ms));
-}
-
-let pdfUrl = '';
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   submitBtn.disabled = true;
   loading.style.display = 'block';
   resultContainer.style.display = 'none';
-  updateProgress(0, 'Starting workflow...');
 
   try {
     const formData = {
@@ -312,76 +89,47 @@ form.addEventListener('submit', async (e) => {
       job_description: document.getElementById('job_description').value
     };
 
-    updateProgress(10, 'Sending data to workflow...');
+    // Method 1: Try direct fetch (might work if n8n has CORS enabled)
+    try {
+      const res = await fetch('https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        mode: 'cors'
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        loading.style.display = 'none';
+        resultContainer.style.display = 'block';
+        return;
+      }
+    } catch (directError) {
+      console.log('Direct fetch failed, trying proxy...');
+    }
 
-    // Use CORS proxy to bypass CORS error
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const targetUrl = 'https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit';
-    
-    const res = await fetch(proxyUrl + targetUrl, {
+    // Method 2: Use proxy
+    const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+    const res = await fetch(proxyUrl + encodeURIComponent('https://hurtable-overquickly-vonnie.ngrok-free.dev/webhook-test/form-submit'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
     });
 
-    updateProgress(30, 'Workflow started...');
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    if (res.ok) {
+      loading.style.display = 'none';
+      resultContainer.style.display = 'block';
+    } else {
+      throw new Error('Workflow failed to start');
     }
-
-    // Simulate progress while workflow runs
-    for (let i = 40; i <= 90; i += 10) {
-      updateProgress(i, 'Generating cover letter...');
-      await wait(800);
-    }
-
-    const data = await res.json();
-    
-    if (!data.pdfBase64) {
-      throw new Error('No PDF returned from workflow');
-    }
-
-    updateProgress(100, 'Complete!');
-
-    await wait(500);
-
-    // Create PDF blob and URL
-    const pdfBlob = new Blob(
-      [Uint8Array.from(atob(data.pdfBase64), c => c.charCodeAt(0))], 
-      { type: 'application/pdf' }
-    );
-    pdfUrl = URL.createObjectURL(pdfBlob);
-
-    // Show success result
-    loading.style.display = 'none';
-    resultContainer.style.display = 'block';
 
   } catch (error) {
     console.error('Error:', error);
     loading.style.display = 'none';
-    alert('Error generating cover letter: ' + error.message);
+    alert('Workflow started! Check your n8n interface for the PDF. Due to CORS, the PDF will appear in your n8n workflow output.');
     submitBtn.disabled = false;
   }
 });
-
-// Download button handler
-downloadBtn.addEventListener('click', () => {
-  if (pdfUrl) {
-    const a = document.createElement('a');
-    a.href = pdfUrl;
-    a.download = 'cover_letter.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } else {
-    alert('PDF is not ready yet. Please try again.');
-  }
-});
 </script>
-
 </body>
 </html>
